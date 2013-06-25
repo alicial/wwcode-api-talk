@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Women Who Code Ruby Tuesday - API Design talk</title>
+
+    <meta name="description" content="Women Who Code Ruby Tuesday - API Design talk">
+    <meta name="author" content="Alicia Liu">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+        document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section>
+            <h3>#WWCode Ruby Tuesday</h3>
+            <h1>API Design</h1>
+            <h5><a href="http://alicialiu.net">Alicia Liu</a></h5>
+            <p><a href="http://twitter.com/aliciatweet">@aliciatweet</a></p>
+        </section>
+        <section>
+            <section>
+                <h3>Application Programming Interface</h3>
+                <ul>
+                    <li>Purpose</li>
+                    <li>Contract</li>
+                </ul>
+            </section>
+            <section>
+                <h1>Consumers</h1>
+                <ul>
+                    <li>Mobile app</li>
+                    <li>JavaScript</li>
+                    <li>Developers</li>
+                </ul>
+            </section>
+            <section>
+                <pre><code data-trim contenteditable>
+&nbsp;       -------------- GET /coders -----------&gt;
+client                                            server
+        &lt;-------- &lt;html&gt;...&lt;/html&gt; ------------
+
+
+        -------------- GET /coders -----------&gt;
+client                                            server (API)
+        &lt;---- {'coders':['Alice','Bob']} ------
+
+                </code></pre>
+            </section>
+        </section>
+        <section>
+            <section>
+            <h1>REST</h1>
+            <ul>
+                <li>Stateless</li>
+                <li>Resources</li>
+                <li>Verbs: POST, GET, PUT, DELETE</li>
+            </ul>
+            </section>
+            <section>
+                <pre><code data-trim contenteditable>
+#routes.rb
+
+resources :coders, :only => [:create, :show, :update, :delete]
+
+# POST /coders
+# GET /coders/:id
+# PUT /coders/:id
+# DELETE /coders/:id
+                </code></pre>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h1>Payloads</h1>
+                <ul>
+                    <li>JSON</li>
+                    <li>Serialization</li>
+                    <ul>
+                        <li>as_json</li>
+                        <li>Presenters</li>
+                        <li>RABL, Jbuilder</li>
+                    </ul>
+                </ul>
+            </section>
+            <section>
+                <pre><code data-trim contenteditable>
+  # coders_controller.rb
+  class CodersController < ApplicationController
+    def show
+      @coder = Coder.find(params[:id])
+
+      respond_to do |format|
+        format.html
+        format.json { render :json => @coder.as_json }
+      end
+    end
+  end
+                </code></pre>
+            </section>
+        </section>
+        <section>
+            <h1>Authentication</h1>
+            <ul>
+                <li>Basic HTTP auth</li>
+                <li>Access token</li>
+            </ul>
+        </section>
+        <section>
+            <h1>Versioning</h1>
+            <pre><code data-trim contenteditable>
+#routes.rb
+namespace :api do
+  namespace :v1 do
+    get '/coders', :to => 'coders#index'
+    get '/coders/:id', :to => 'coders#show'
+  end
+  namespace :v2 do
+    get '/coders/:id', :to => 'coders#show'
+  end
+end
+
+# GET /api/v1/coders
+# GET /api/v1/coders/:id
+# GET /api/v2/coders/:id
+# GET /api/v2/coders => 404
+            </code></pre>
+        </section>
+        <section>
+            <h1>Resources</h1>
+            <p><small>Pun not intended</small></p>
+            <ul>
+                <li><a href="https://github.com/rails-api/rails-api" target="_blank">Rails API gem</a></li>
+                <li><a href="https://github.com/nesquena/rabl" target="_blank">RABL</a></li>
+                <li><a href="https://github.com/rails/jbuilder" target="_blank">Jbuilder</a></li>
+                <li><a href="http://railscasts.com/episodes/287-presenters-from-scratch" target="_blank">Presenter pattern RailsCast</a></li>
+                <li><a href="http://railscasts.com/episodes/352-securing-an-api" target="_blank">Securing an API RailsCast</a></li>
+                <li><a href="http://railscasts.com/episodes/350-rest-api-versioning" target="_blank">API versioning RailsCast</a></li>
+                <li><a href="https://github.com/bwillis/versioncake" target="_blank">VersionCake gem</a></li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+
+    // Full list of configuration options available here:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+            { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+            { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+            { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+    });
+
+</script>
+
+</body>
+</html>
